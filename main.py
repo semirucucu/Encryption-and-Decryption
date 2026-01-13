@@ -1,6 +1,8 @@
 import base64
 import hashlib
 import tkinter
+from tkinter import messagebox
+
 from cryptography.fernet import Fernet
 
 window = tkinter.Tk()
@@ -12,43 +14,51 @@ def EncryptButton():
     secret = entryTextOfSecret.get("1.0",tkinter.END)
     title = entryTextOfTitle.get()
 
-    key = base64.urlsafe_b64encode(
-        hashlib.sha256(masterKey.encode()).digest()
-    )
+    if (masterKey != "" and secret != "" and title != ""):
 
-    fernet = Fernet(key)
+        key = base64.urlsafe_b64encode(
+            hashlib.sha256(masterKey.encode()).digest()
+        )
 
-    encrypted = fernet.encrypt(secret.encode())
+        fernet = Fernet(key)
 
-    with open("secrets.txt", "a", encoding="utf-8") as file:
-        file.write(title + "\n" + encrypted.decode() + "\n\n")
+        encrypted = fernet.encrypt(secret.encode())
 
-    entryTextOfSecret.delete("1.0",tkinter.END)
-    entryTextOfMasterKey.delete(0,tkinter.END)
-    entryTextOfTitle.delete(0,tkinter.END)
+        with open("secrets.txt", "a", encoding="utf-8") as file:
+            file.write(title + "\n" + encrypted.decode() + "\n\n")
+
+        entryTextOfSecret.delete("1.0",tkinter.END)
+        entryTextOfMasterKey.delete(0,tkinter.END)
+        entryTextOfTitle.delete(0,tkinter.END)
+
+    else:
+        messagebox.showinfo("Warning","Don't let the textboxes empty!")
 
 def DecryptButton():
     secret = entryTextOfSecret.get("1.0", tkinter.END)
     masterKey = entryTextOfMasterKey.get()
 
+    if (masterKey != "" and secret != ""):
 
-    key = base64.urlsafe_b64encode(
-        hashlib.sha256(masterKey.encode()).digest()
-    )
+        key = base64.urlsafe_b64encode(
+            hashlib.sha256(masterKey.encode()).digest()
+        )
 
-    fernet = Fernet(key)
+        fernet = Fernet(key)
 
-    try:
-        encryptedBytes = secret.encode()
-        decrypted = fernet.decrypt(encryptedBytes)
+        try:
+            encryptedBytes = secret.encode()
+            decrypted = fernet.decrypt(encryptedBytes)
 
-        entryTextOfSecret.delete("1.0",tkinter.END)
-        entryTextOfSecret.insert("1.0",decrypted.decode())
-    except:
-        fake_message = fernet.encrypt(b"ACCESS DENIED").decode()
+            entryTextOfSecret.delete("1.0",tkinter.END)
+            entryTextOfSecret.insert("1.0",decrypted.decode())
+        except:
+            fake_message = fernet.encrypt(b"ACCESS DENIED").decode()
 
-        entryTextOfSecret.delete("1.0", tkinter.END)
-        entryTextOfSecret.insert("1.0", fake_message)
+            entryTextOfSecret.delete("1.0", tkinter.END)
+            entryTextOfSecret.insert("1.0", fake_message)
+    else:
+        messagebox.showinfo("Warning","Enter your encrypted text and master key!")
 
 
 #resim
